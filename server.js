@@ -62,7 +62,6 @@ const getUserService = (token) => {
     });
 };
 const getChipService = (com, data) => {
-  console.log(data);
   return axios({
     url: "http://127.0.0.1:8081/api/req/nodeService/" + com,
     method: "post",
@@ -446,6 +445,7 @@ const inc = () => {
   var sendddata = { gameName: "Slot", data: uddata };
 
   const userdata = getChipService("gamesEndGame", sendddata);
+  console.log(userdata);
 };
 
 const createUser = function (wheelId, comment) {
