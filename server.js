@@ -189,7 +189,7 @@ wheelNamespace.use(async (socket, next) => {
   if (socket.user != user) {
     // const userdata = await getUserService("Command=AccountsGet&Player=" + user);
     const userdata = await getUserService(token);
-
+    console.log(userdata);
     if (userdata?.username == user) {
       wheelNamespace.in(user).disconnectSockets(true);
 
