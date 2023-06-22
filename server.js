@@ -245,7 +245,7 @@ wheelNamespace.on("connection", (socket) => {
       }
     }
   });
-  if (!socket.userdata.username) {
+  if (!socket?.userdata?.username) {
     socket.emit("msg", { command: "disconnect" });
   } else {
     socket.emit("msg", { command: "users", data: wheelusers });
