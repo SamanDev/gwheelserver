@@ -204,7 +204,7 @@ wheelNamespace.use(async (socket, next) => {
       socket.user = userdata.username;
       next();
     } else {
-      socket.emit("msg", { command: "disconnect" });
+      next();
     }
   } else {
     next();
@@ -245,17 +245,21 @@ wheelNamespace.on("connection", (socket) => {
       }
     }
   });
-  socket.emit("msg", { command: "users", data: wheelusers });
-  wheelNamespace.emit("msg", {
-    command: "online",
-    data: wheelNamespace.sockets.size,
-  });
-  socket.emit("msg", { command: "setuser", data: socket.userdata });
+  if (!socket.userdata.username) {
+    socket.emit("msg", { command: "disconnect" });
+  } else {
+    socket.emit("msg", { command: "users", data: wheelusers });
+    wheelNamespace.emit("msg", {
+      command: "online",
+      data: wheelNamespace.sockets.size,
+    });
+    socket.emit("msg", { command: "setuser", data: socket.userdata });
 
-  socket.emit("msg", {
-    command: "update",
-    data: wheel,
-  });
+    socket.emit("msg", {
+      command: "update",
+      data: wheel,
+    });
+  }
 
   // getLast(socket);
 });
