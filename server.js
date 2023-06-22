@@ -429,7 +429,7 @@ const dec = async () => {
   }
   var sendddata = { gameName: "Slot", data: uddata };
   const userdata = await getChipService("gamesStartGame", sendddata);
-
+  console.log(userdata);
   //wheelNamespace.emit("msg", { command: "update", data: wheel });
 };
 const inc = () => {
