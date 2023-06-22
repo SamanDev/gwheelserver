@@ -239,16 +239,7 @@ wheelNamespace.on("connection", (socket) => {
         } else {
           wheelusers.push(data);
         }
-        await User.findOneAndUpdate(
-          { _id: socket.userdata._id, balance2: { $gt: data.bet - 1 } },
-          { $inc: { balance2: data.bet * -1 } }
-        ).then((res) => {
-          if (res?.username) {
-            var _d = res;
-            _d.balance2 = _d.balance2 - data.bet;
-            socket.broadcast.emit("msg", { command: "bets", data: data });
-          }
-        });
+        socket.broadcast.emit("msg", { command: "bets", data: data });
 
         // wheelNamespace.emit("msg", { command: "bets", data: data });
       }
@@ -327,7 +318,9 @@ const spin = async () => {
     serverSec: seconds,
     number: newPrizeNumbern,
   });
-
+  if (wheelusers.length > 0) {
+    dec();
+  }
   setTimeout(() => {
     spinstop();
   }, 25000);
