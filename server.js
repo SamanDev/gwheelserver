@@ -5,7 +5,7 @@ const axios = require("axios").create({ baseUrl: "http://127.0.0.1:8081" });
 var corsOptions = {
   origin: ["https://gwheelui.pages.dev", "http://localhost:3000"],
 };
-const serverPort = process.env.NODE_ENV === "production" ? 2083 : 8085;
+const serverPort = process.env.NODE_ENV === "production" ? 2083 : 2525;
 const soocketPort = process.env.NODE_ENV === "production" ? 2087 : 2424;
 app.use(cors(corsOptions));
 
