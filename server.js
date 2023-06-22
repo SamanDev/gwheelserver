@@ -204,7 +204,7 @@ wheelNamespace.use(async (socket, next) => {
       socket.user = userdata.username;
       next();
     } else {
-      next();
+      socket.disconnectSockets(true);
     }
   } else {
     next();
