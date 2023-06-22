@@ -1,26 +1,22 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
-
+const axios = require("axios").create({ baseUrl: "http://127.0.0.1:8081" });
 var corsOptions = {
-  origin: [
-    "https://wheelofpersia.com",
-    "http://wheelofpersia.com",
-    "http://localhost:3000",
-  ],
+  origin: ["https://gwheelui.pages.dev", "http://localhost:3000"],
 };
 const serverPort = process.env.NODE_ENV === "production" ? 2083 : 8085;
-const soocketPort = process.env.NODE_ENV === "production" ? 2087 : 8484;
+const soocketPort = process.env.NODE_ENV === "production" ? 2087 : 2424;
 app.use(cors(corsOptions));
 
 // parse requests of content-type - application/json
 app.use(express.json());
 
 const db = require("./app/models");
-const Role = db.role;
+
 const User = db.user;
 const Wheel = db.Wheel;
-const Tokens = db.token;
+
 function groupBySingleField(data, field) {
   return data.reduce((acc, val) => {
     const rest = Object.keys(val).reduce((newObj, key) => {
@@ -50,9 +46,36 @@ db.mongoose
     process.exit();
   });
 
-// simple route
+const getUserService = (token) => {
+  return axios({
+    url: "http://127.0.0.1:8081/api/req/gamesGetUser",
+    method: "get",
+    headers: {
+      Authorization: token ? `LooLe  ${token}` : null,
+    },
+  })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+const getChipService = (com, data) => {
+  console.log(data);
+  return axios({
+    url: "http://127.0.0.1:8081/api/req/nodeService/" + com,
+    method: "post",
 
-// routes
+    data,
+  })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
 var userswinLisr = "";
 app.get("/lastlist", async (req, res) => {
   if (req.query.l == "users") {
@@ -160,21 +183,34 @@ wheelNamespace.on("disconnect", (reason) => {
   console.log(reason); // else the socket will automatically try to reconnect
 });
 wheelNamespace.use(async (socket, next) => {
-  const user = socket.handshake.auth;
-  if (socket.userdata) {
-    next();
-  } else {
-    await User.findById(user.id).then((res) => {
-      if (res?.username) {
-        wheelNamespace.in(user.username).disconnectSockets(true);
-        socket.userdata = res;
-        socket.join(user.username);
+  const user = socket.handshake.auth.username;
+  const token = socket.handshake.auth.token;
 
-        next();
-      }
-    });
+  if (socket.user != user) {
+    // const userdata = await getUserService("Command=AccountsGet&Player=" + user);
+    const userdata = await getUserService(token);
+
+    if (userdata?.username == user) {
+      wheelNamespace.in(user).disconnectSockets(true);
+
+      socket.join(user);
+      let getuser = {
+        username: userdata.username,
+        balance: userdata.balance,
+        balance2: userdata.balance2,
+        image: userdata.level,
+      };
+      socket.userdata = getuser;
+      socket.user = userdata.username;
+      next();
+    } else {
+      next();
+    }
+  } else {
+    next();
   }
 });
+
 wheelNamespace.on("connection", (socket) => {
   socket.on("addchat", (data) => {
     socket.broadcast.emit("msg", { command: "chat", data: data });
@@ -257,40 +293,6 @@ const initial = async () => {
       doneWheel();
     }, 3000);
   }
-
-  Role.estimatedDocumentCount((err, count) => {
-    if (!err && count === 0) {
-      new Role({
-        name: "user",
-      }).save((err) => {
-        if (err) {
-          console.log("error", err);
-        }
-
-        console.log("added 'user' to roles collection");
-      });
-
-      new Role({
-        name: "moderator",
-      }).save((err) => {
-        if (err) {
-          console.log("error", err);
-        }
-
-        console.log("added 'moderator' to roles collection");
-      });
-
-      new Role({
-        name: "admin",
-      }).save((err) => {
-        if (err) {
-          console.log("error", err);
-        }
-
-        console.log("added 'admin' to roles collection");
-      });
-    }
-  });
 };
 const createWheelData = async () => {
   var wheeldb = await createWheel(wheel?.number);
@@ -421,46 +423,32 @@ const sumOfWin = (array) => {
 };
 const dec = async () => {
   var newData = groupBySingleField(wheelusers, "username");
-
+  var uddata = [];
   for (const property in newData) {
-    var newuser = await User.findOneAndUpdate(
-      { username: property },
-      { $inc: { balance2: sumOfBet(newData[property]) * -1 } }
-    ).then((res) => {
-      if (res?.username) {
-        var _d = res;
-        _d.balance2 = _d.balance2 - sumOfBet(newData[property]);
-
-        wheelNamespace.in(res.username).emit("msg", {
-          command: "user",
-          data: _d,
-        });
-      }
+    uddata.push({
+      bet: sumOfBet(newData[property]),
+      username: property,
     });
   }
-  // if (blnupdate) wheelNamespace.emit("msg", { command: "update", data: wheel });
+  var sendddata = { gameName: "Slot", data: uddata };
+  const userdata = await getChipService("gamesStartGame", sendddata);
+
+  //wheelNamespace.emit("msg", { command: "update", data: wheel });
 };
 const inc = () => {
-  var newDatainc = groupBySingleField(wheelusers, "username");
-
-  for (const property in newDatainc) {
-    if (sumOfWin(newDatainc[property]) > 0) {
-      var newuserinc = User.findOneAndUpdate(
-        { username: property },
-        { $inc: { balance2: sumOfWin(newDatainc[property]) } }
-      ).then((res) => {
-        if (res?.username) {
-          var _d = res;
-          _d.balance2 = _d.balance2 + sumOfWin(newDatainc[property]);
-
-          wheelNamespace.in(res.username).emit("msg", {
-            command: "setuser",
-            data: _d,
-          });
-        }
+  var newData = groupBySingleField(wheelusers, "username");
+  var uddata = [];
+  for (const property in newData) {
+    if (sumOfWin(newData[property]) > 0) {
+      uddata.push({
+        bet: sumOfWin(newData[property]),
+        username: property,
       });
     }
   }
+  var sendddata = { gameName: "Slot", data: uddata };
+
+  const userdata = getChipService("gamesEndGame", sendddata);
 };
 
 const createUser = function (wheelId, comment) {

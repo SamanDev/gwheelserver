@@ -7,8 +7,7 @@ const Wheel = mongoose.model(
     number: { type: Number, default: 0 },
     total: { type: Number, default: 0 },
     net: { type: Number, default: 0 },
-    avex: { type: Number, default: 0 },
-    aveBetx: { type: Number, default: 0 },
+
     serverCode: { type: Number, default: 0 },
     serverSec: { type: Number, default: 0 },
     startNum: { type: Number, default: 0 },
