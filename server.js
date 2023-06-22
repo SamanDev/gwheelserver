@@ -69,6 +69,7 @@ const getChipService = (com, data) => {
     data,
   })
     .then((response) => {
+      console.log(response.data);
       return response.data;
     })
     .catch((err) => {
@@ -428,10 +429,10 @@ const dec = async () => {
   }
   var sendddata = { gameName: "Slot", data: uddata };
   const userdata = await getChipService("gamesStartGame", sendddata);
-  console.log(userdata);
+
   //wheelNamespace.emit("msg", { command: "update", data: wheel });
 };
-const inc = () => {
+const inc = async () => {
   var newData = groupBySingleField(wheelusers, "username");
   var uddata = [];
   for (const property in newData) {
@@ -444,8 +445,7 @@ const inc = () => {
   }
   var sendddata = { gameName: "Slot", data: uddata };
 
-  const userdata = getChipService("gamesEndGame", sendddata);
-  console.log(userdata);
+  const userdata = await getChipService("gamesEndGame", sendddata);
 };
 
 const createUser = function (wheelId, comment) {
