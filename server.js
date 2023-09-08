@@ -33,8 +33,16 @@ function groupBySingleField(data, field) {
     return acc;
   }, {});
 }
+const serverDB2 =
+  process.env.NODE_ENV === "production"
+    ? "mongodb+srv://salar:42101365@wheel.1pavbxp.mongodb.net/GalaxyWheel"
+    : "mongodb+srv://salar:42101365@wheel.1pavbxp.mongodb.net/GalaxyWheel";
+const serverDB =
+  process.env.NODE_ENV === "production"
+    ? "mongodb://localhost:27017/GalaxyWheel"
+    : "mongodb://localhost:27017/GalaxyWheel";
 db.mongoose
-  .connect(`mongodb+srv://salar:42101365@wheel.1pavbxp.mongodb.net/GWheelNew`, {
+  .connect(serverDB, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -148,10 +156,11 @@ var wheel = {
   date: d,
 };
 var wheelusers = [];
-
+var wheelusersdata = [];
 const createWheel = function (startNum) {
   const d = new Date();
   let seconds = d.getSeconds();
+  wheelusersdata = [];
   return Wheel.create({
     status: "Pending",
     number: 0,
@@ -259,6 +268,12 @@ wheelNamespace.on("connection", (socket) => {
       command: "update",
       data: wheel,
     });
+    var _d = {
+      txt: "is online now",
+      username: socket.userdata.username,
+      image: socket.userdata.image,
+    };
+    wheelNamespace.emit("msg", { command: "chat", data: _d });
   }
 
   // getLast(socket);
@@ -290,6 +305,12 @@ const initial = async () => {
   }
 };
 const createWheelData = async () => {
+  var _d = {
+    txt: "Time to bet...",
+    username: "System",
+    image: "",
+  };
+  wheelNamespace.emit("msg", { command: "chat", data: _d });
   var wheeldb = await createWheel(wheel?.number);
 
   wheel = wheeldb;
@@ -305,6 +326,12 @@ const createWheelData = async () => {
   }, 15000);
 };
 const spin = async () => {
+  var _d = {
+    txt: "Spining...",
+    username: "System",
+    image: "",
+  };
+  wheelNamespace.emit("msg", { command: "chat", data: _d });
   const d = new Date();
   let seconds = (wheel?.serverSec + 30) % 60;
 
@@ -341,7 +368,14 @@ const spinstop = async () => {
       _net = _net + item.win;
     });
   }
-
+  if (_tot > 0) {
+    var _d = {
+      txt: "Calculating... \n Bets: " + _tot + " \n Wins: " + _net,
+      username: "System",
+      image: "",
+    };
+    wheelNamespace.emit("msg", { command: "chat", data: _d });
+  }
   wheel.total = _tot;
   wheel.net = _net;
   wheelNamespace.emit("msg", {
@@ -364,9 +398,17 @@ const spinstop = async () => {
   }, _time);
 };
 const doneWheel = async () => {
+  var _d = {
+    txt: segments[wheel.number] + " WheelDone",
+    username: "System",
+    image: "",
+    wheel: wheel,
+  };
+  wheelNamespace.emit("msg", { command: "chat", data: _d });
   userswinLisr = "";
   var _time = 3000;
   wheel.status = "Done";
+
   wheelNamespace.emit("msg", {
     command: "update",
     data: wheel,
@@ -427,27 +469,36 @@ const dec = async () => {
       username: property,
     });
   }
-  var sendddata = { gameName: "Slot", data: uddata };
+  var sendddata = { gameName: "Wheel", data: uddata };
   const userdata = await getChipService("gamesStartGame", sendddata);
-
+  wheelusersdata = userdata.data;
   //wheelNamespace.emit("msg", { command: "update", data: wheel });
 };
 const inc = async () => {
   var newData = groupBySingleField(wheelusers, "username");
   var uddata = [];
   for (const property in newData) {
-    if (sumOfWin(newData[property]) > 0) {
+    if (sumOfWin(newData[property]) > 0 && checkbet(property)) {
       uddata.push({
         bet: sumOfWin(newData[property]),
         username: property,
       });
     }
   }
-  var sendddata = { gameName: "Slot", data: uddata };
+  var sendddata = { gameName: "Wheel", data: uddata };
 
   const userdata = await getChipService("gamesEndGame", sendddata);
 };
 
+const checkbet = (usercheck) => {
+  try {
+    return (
+      wheelusersdata.filter((user) => user.username == usercheck).length > 0
+    );
+  } catch (error) {
+    return false;
+  }
+};
 const createUser = function (wheelId, comment) {
   return db.userWheel.create(comment).then((docComment) => {
     return db.Wheel.findByIdAndUpdate(
