@@ -55,7 +55,7 @@ app.post("/add", async (req, res) => {
   const bet = new TopWins({
     game: req.body.game,
     userdata: JSON.stringify(req.body.userdata),
-    alldata: JSON.stringify(req.body.payw),
+    alldata: JSON.stringify(req.body.alldata),
     username:req.body.userdata.nickname,
     win:req.body.userdata.win,
     x:req.body.userdata.x,
