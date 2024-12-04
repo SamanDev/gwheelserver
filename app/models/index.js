@@ -5,7 +5,6 @@ const db = {};
 
 db.mongoose = mongoose;
 
-db.Wheel = require("./wheel");
-db.userWheel = require("./user");
+db.TopWins = require("./wheel");
 
 module.exports = db;
