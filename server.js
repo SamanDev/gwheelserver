@@ -55,7 +55,7 @@ app.post("/add", async (req, res) => {
   const bet = new TopWins({
     game: req.body.game,
     userdata: JSON.stringify(req.body.userdata),
-    alldata: JSON.stringify(req.body.alldata),
+    alldata: JSON.stringify(req.body.segments),
 
   });
   const myres = await bet.save();
