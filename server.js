@@ -51,10 +51,11 @@ app.get("/lastlist", async (req, res) => {
 });
 
 app.post("/add", async (req, res) => {
+  
   const bet = new TopWins({
-    game: req.params.game,
-    userdata: req.params.userdata,
-    alldata: req.params.userdata,
+    game: req.body.game,
+    userdata: JSON.stringify(req.body.userdata),
+    alldata: JSON.stringify(req.body.alldata),
 
   });
   const myres = await bet.save();
