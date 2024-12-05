@@ -37,17 +37,29 @@ db.mongoose
     //process.exit();
   });
 
-app.get("/lastlist", async (req, res) => {
+  app.get("/lastlist", async (req, res) => {
   
-      const userswin = await TopWins.find(
-        {},
-      )
+    const userswin = await TopWins.find(
+      {},{ userdata: 1,game:1,username:1,x:1,date:1 }
+    )
 
-        .limit(10)
-      
-    res.json(userswin);
+      .limit(50).sort({date:-1});
+    
+  res.json(userswin);
+
+
+});
+app.get("/biglist", async (req, res) => {
   
+  const userswin = await TopWins.find(
+    {},{ userdata: 1,game:1,username:1,x:1,date:1 }
+  )
+
+    .limit(50).sort({x:-1});
   
+res.json(userswin);
+
+
 });
 
 app.post("/add", async (req, res) => {
