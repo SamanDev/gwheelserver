@@ -4,7 +4,7 @@ const app = express();
 const axios= require("axios").create({ baseUrl: "http://127.0.0.1:8081" });
 const axios3 = require("axios").create({ baseUrl: "https://api.glxypkr.com" });
 var corsOptions = {
-  origin: ["*"],
+  origin: "*"
 };
 const serverPort = process.env.NODE_ENV === "production" ? 2083 : 2525;
 app.use(cors(corsOptions));
