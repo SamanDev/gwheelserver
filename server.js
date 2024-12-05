@@ -51,7 +51,7 @@ app.get("/lastlist", async (req, res) => {
 });
 
 app.post("/add", async (req, res) => {
-  
+  if(req.body.userdata.x>3 || req.body.userdata.win>=3000000){
   const bet = new TopWins({
     game: req.body.game,
     userdata: JSON.stringify(req.body.userdata),
@@ -64,6 +64,10 @@ app.post("/add", async (req, res) => {
   const myres = await bet.save();
 
   return res.status(200).json(myres);
+}else{
+  return res.status(200).json(req.body.userdata);
+}
+
 });
 const initial = async () => {
   console.log("initial");
