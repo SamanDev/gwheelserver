@@ -40,10 +40,10 @@ db.mongoose
   app.get("/lastlist", async (req, res) => {
   
     const userswin = await TopWins.find(
-      {},{ userdata: 1,game:1,username:1,x:1,date:1,win:1 }
+      {win : { $gt: 2999999 }},{ userdata: 1,game:1,username:1,x:1,date:1,win:1 }
     )
 
-      .limit(50).sort({date:-1});
+      .limit(100).sort({date:-1});
     
   res.json(userswin);
 
@@ -52,10 +52,10 @@ db.mongoose
 app.get("/biglist", async (req, res) => {
   
   const userswin = await TopWins.find(
-    {},{ userdata: 1,game:1,username:1,x:1,date:1,win:1 }
+    {win : { $gt: 3000000 }},{ userdata: 1,game:1,username:1,x:1,date:1,win:1 }
   )
 
-    .limit(50).sort({x:-1});
+    .limit(100).sort({win:-1});
   
 res.json(userswin);
 
