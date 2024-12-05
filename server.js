@@ -7,7 +7,7 @@ var corsOptions = {
   origin: ["*"],
 };
 const serverPort = process.env.NODE_ENV === "production" ? 2083 : 2525;
-app.use();
+app.use(cors(corsOptions));
 
 // parse requests of content-type - application/json
 app.use(express.json());
